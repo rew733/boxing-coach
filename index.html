@@ -1,0 +1,2111 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>مدرب الملاكمة التفاعلي - حركة ولكمات احترافية متقنة</title>
+<style>
+  :root {
+    --bg: #080a0f;
+    --card: #131720;
+    --card-inner: #0d1017;
+    --accent: #e63946;
+    --gold: #ffb703;
+    --green: #2a9d8f;
+    --blue: #38bdf8;
+    --text: #f1faee;
+    --muted: #8d99ae;
+  }
+  * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
+  body {
+    margin: 0; padding: 12px;
+    background-color: var(--bg); color: var(--text);
+    display: flex; flex-direction: column; align-items: center;
+    min-height: 100vh;
+  }
+  .container { width: 100%; max-width: 540px; }
+  header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 10px; border-bottom: 1px solid #232834; padding-bottom: 8px;
+  }
+  h1 { font-size: 1.1rem; margin: 0; color: var(--text); }
+  .media-setup-btn {
+    background: rgba(56, 189, 248, 0.14); color: var(--blue);
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    padding: 5px 10px; border-radius: 8px; font-size: 0.76rem; font-weight: bold;
+    cursor: pointer;
+  }
+  .card {
+    background: var(--card); border-radius: 16px; padding: 14px;
+    margin-bottom: 12px; box-shadow: 0 6px 24px rgba(0,0,0,0.55);
+    text-align: center;
+  }
+
+  /* بطاقات اختيار وضع التدريب */
+  .modes-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .mode-card {
+    background: var(--card-inner);
+    border: 1.5px solid #262c3a;
+    border-radius: 12px;
+    padding: 9px 6px;
+    cursor: pointer;
+    text-align: center;
+    transition: 0.2s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .mode-card.active {
+    border-color: var(--accent);
+    background: rgba(230, 57, 70, 0.15);
+    box-shadow: 0 0 14px rgba(230, 57, 70, 0.22);
+  }
+  .mode-icon { font-size: 1.25rem; margin-bottom: 2px; }
+  .mode-title { font-size: 0.85rem; font-weight: 800; color: #fff; }
+  .mode-desc { font-size: 0.7rem; color: var(--muted); margin-top: 2px; line-height: 1.2; }
+
+  .top-status {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 6px;
+  }
+  .round-status {
+    font-size: 0.88rem; font-weight: bold; padding: 4px 12px;
+    border-radius: 20px; display: inline-block;
+  }
+  .status-fight { background: rgba(230, 57, 70, 0.2); color: var(--accent); }
+  .status-rest { background: rgba(42, 157, 143, 0.2); color: var(--green); }
+  .timer-display {
+    font-size: 1.95rem; font-weight: 800; letter-spacing: 1px;
+    font-variant-numeric: tabular-nums;
+  }
+  .timer-warning { color: var(--gold); }
+  .active-mode-pill {
+    font-size: 0.76rem; font-weight: bold; padding: 4px 10px;
+    border-radius: 8px; background: rgba(58, 134, 255, 0.18); color: #90e0ef;
+  }
+
+  /* مسرح الملاكم */
+  .stage-box {
+    position: relative;
+    width: 100%;
+    height: 410px;
+    background: #07090e;
+    border: 2px solid #262c3a;
+    border-radius: 14px;
+    overflow: hidden;
+    margin: 8px 0;
+  }
+  #coachCanvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+  }
+  .stage-overlay-top {
+    position: absolute;
+    top: 8px; left: 10px; right: 10px;
+    z-index: 3;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    pointer-events: none;
+  }
+  .live-move-badge {
+    background: rgba(42, 157, 143, 0.9);
+    color: #fff;
+    font-size: 0.88rem;
+    font-weight: 800;
+    padding: 5px 14px;
+    border-radius: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.6);
+  }
+  .stance-legend {
+    position: absolute;
+    bottom: 8px; left: 10px; right: 10px;
+    z-index: 3;
+    display: flex;
+    justify-content: space-between;
+    pointer-events: none;
+    font-size: 0.72rem;
+    color: #cbd5e1;
+  }
+  .legend-pill {
+    background: rgba(13, 16, 23, 0.82);
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 3px 8px;
+    border-radius: 6px;
+  }
+  .rep-badge {
+    background: rgba(15, 19, 28, 0.85);
+    border: 1px solid rgba(255, 183, 3, 0.4);
+    color: var(--gold);
+    font-size: 0.78rem;
+    font-weight: bold;
+    padding: 4px 10px;
+    border-radius: 8px;
+    display: none;
+  }
+  .next-combo-btn {
+    pointer-events: auto;
+    background: rgba(35, 40, 52, 0.9);
+    color: #a8dadc;
+    border: 1px solid #3d4659;
+    font-size: 0.76rem;
+    font-weight: bold;
+    padding: 4px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: none;
+  }
+
+  /* لوحة رفع مقاطع الفيديو الاختيارية */
+  .media-drawer {
+    display: none;
+    background: #0e121b;
+    border: 1px solid #2c3548;
+    border-radius: 14px;
+    padding: 12px;
+    margin-bottom: 12px;
+    text-align: right;
+  }
+  .media-drawer h3 { margin: 0 0 6px 0; font-size: 0.92rem; color: var(--blue); }
+  .media-drawer p { margin: 0 0 10px 0; font-size: 0.78rem; color: var(--muted); line-height: 1.45; }
+  .pose-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .pose-slot {
+    background: #151b28; border: 1px solid #283042; border-radius: 10px;
+    padding: 8px; display: flex; flex-direction: column; gap: 6px;
+  }
+  .pose-slot-header {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 0.78rem; font-weight: bold; color: #e2e8f0;
+  }
+  .pose-status { font-size: 0.7rem; color: var(--muted); }
+  .pose-status.loaded-vid { color: var(--gold); font-weight: bold; }
+  .slot-actions { display: flex; gap: 4px; }
+  .pose-btn {
+    flex: 1; background: #232b3d; color: #fff; border: 1px solid #364158;
+    padding: 6px 4px; border-radius: 6px; font-size: 0.74rem; cursor: pointer; text-align: center;
+  }
+  .slot-del-btn {
+    background: rgba(230, 57, 70, 0.2); color: var(--accent); border: none;
+    border-radius: 6px; padding: 0 8px; font-size: 0.74rem; cursor: pointer;
+  }
+  .drawer-footer { display: flex; gap: 8px; margin-top: 10px; }
+  .clear-media-btn {
+    flex: 1; background: rgba(230, 57, 70, 0.18);
+    color: var(--accent); border: 1px solid rgba(230, 57, 70, 0.4);
+    padding: 8px; border-radius: 8px; font-size: 0.8rem; font-weight: bold; cursor: pointer;
+  }
+  .close-drawer-btn {
+    flex: 0.6; background: #232b3d; color: #cbd5e1; border: 1px solid #364158;
+    padding: 8px; border-radius: 8px; font-size: 0.8rem; font-weight: bold; cursor: pointer;
+  }
+
+  /* شريط تسارع الإيقاع */
+  .tempo-bar-wrap {
+    display: none;
+    margin: 6px 0;
+    background: var(--card-inner);
+    padding: 7px 10px;
+    border-radius: 10px;
+    border: 1px solid #262c3a;
+  }
+  .tempo-header {
+    display: flex; justify-content: space-between; font-size: 0.76rem;
+    color: var(--gold); font-weight: bold; margin-bottom: 4px;
+  }
+  .tempo-track {
+    width: 100%; height: 6px; background: #1e2430; border-radius: 6px; overflow: hidden;
+  }
+  .tempo-fill {
+    height: 100%; width: 20%;
+    background: linear-gradient(90deg, var(--green), var(--gold), var(--accent));
+    transition: width 0.4s ease;
+  }
+
+  /* صندوق عرض الكمبو */
+  .combo-box {
+    min-height: 92px;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    border: 1px dashed #333b4d;
+    border-radius: 12px;
+    padding: 10px 12px;
+    margin: 8px 0;
+    background: var(--card-inner);
+  }
+  .combo-text {
+    font-size: 1.22rem;
+    font-weight: 800;
+    line-height: 1.65;
+    color: #cbd5e1;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+  }
+  .step-chip {
+    padding: 2px 8px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.04);
+    transition: 0.15s;
+  }
+  .step-chip.active-step {
+    background: var(--accent);
+    color: #fff;
+    transform: scale(1.06);
+    box-shadow: 0 0 12px rgba(230, 57, 70, 0.5);
+  }
+  .step-chip.done-step { color: #64748b; }
+  .combo-sub { font-size: 0.82rem; font-weight: 500; color: #a8dadc; margin-top: 6px; }
+
+  .controls { display: flex; gap: 10px; margin-top: 8px; }
+  button.main-btn {
+    flex: 1; padding: 14px; border: none; border-radius: 12px;
+    font-size: 1.08rem; font-weight: bold; cursor: pointer; transition: 0.2s;
+  }
+  #startBtn { background: var(--accent); color: white; }
+  #startBtn.running { background: #4a5568; }
+  #bellBtn { background: #262c3a; color: white; flex: 0.28; }
+
+  .setting-row {
+    display: flex; flex-direction: column; text-align: right; margin-bottom: 13px;
+  }
+  .setting-header {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 0.86rem; color: var(--muted); margin-bottom: 5px;
+  }
+  input[type="range"] { width: 100%; accent-color: var(--accent); }
+  select, input[type="text"] {
+    width: 100%; padding: 9px; border-radius: 8px; border: 1px solid #2b2f3a;
+    background: var(--card-inner); color: white; font-size: 0.9rem;
+  }
+  .custom-add { display: flex; gap: 8px; margin-top: 6px; }
+  .add-btn {
+    background: var(--green); color: white; border: none;
+    padding: 0 14px; border-radius: 8px; font-weight: bold; cursor: pointer;
+  }
+  .custom-list {
+    margin-top: 8px; display: flex; flex-direction: column; gap: 6px;
+    max-height: 120px; overflow-y: auto;
+  }
+  .custom-item {
+    display: flex; justify-content: space-between; align-items: center;
+    background: var(--card-inner); border: 1px solid #262c3a; border-radius: 8px;
+    padding: 6px 10px; font-size: 0.84rem; color: var(--text);
+  }
+  .del-btn {
+    background: rgba(230, 57, 70, 0.2); color: var(--accent); border: none;
+    border-radius: 6px; padding: 3px 8px; font-size: 0.74rem; cursor: pointer;
+  }
+</style>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#080a0f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>🥊 مدرب الملاكمة التفاعلي (Pad Work)</h1>
+    <button type="button" class="media-setup-btn" onclick="toggleMediaDrawer()">🎬 مقاطع فيديو (اختياري)</button>
+  </header>
+
+  <!-- درج مقاطع الفيديو الحقيقية الاختيارية -->
+  <div id="mediaDrawer" class="media-drawer">
+    <h3>🎬 استبدال الحركة بمقاطع فيديو حقيقية (MP4 / WebM)</h3>
+    <p>إذا كانت لديك مقاطع فيديو حقيقية (MP4) لكل لكمة، يمكنك إضافتها هنا وسيشغلها التطبيق تلقائياً، أو اتركها فارغة لاستخدام المحرك المدمج عالي الدقة:</p>
+    <div class="pose-grid" id="poseSlotsContainer"></div>
+    <div class="drawer-footer">
+      <button type="button" class="clear-media-btn" onclick="clearAllMedia()">العودة للمحرك المدمج</button>
+      <button type="button" class="close-drawer-btn" onclick="toggleMediaDrawer()">إغلاق</button>
+    </div>
+  </div>
+
+  <!-- اختيار وضع التدريب -->
+  <div class="modes-grid">
+    <div id="card_session" class="mode-card active" onclick="selectTrainingMode('session')">
+      <div class="mode-icon">🏆</div>
+      <div class="mode-title">حصة كاملة (3 جولات)</div>
+      <div class="mode-desc">ج1: تكرار • ج2: مضاد • ج3: حر موجه</div>
+    </div>
+    <div id="card_rep" class="mode-card" onclick="selectTrainingMode('rep')">
+      <div class="mode-icon">🔁</div>
+      <div class="mode-title">وضع التكرار (Repetitions)</div>
+      <div class="mode-desc">تثبيت تركيبة واحدة وتسريعها تدريجياً</div>
+    </div>
+    <div id="card_counter" class="mode-card" onclick="selectTrainingMode('counter')">
+      <div class="mode-icon">🛡️</div>
+      <div class="mode-title">الهجوم المضاد (Counter)</div>
+      <div class="mode-desc">كل أمر يبدأ بدفاع إلزامي ثم رد خاطف</div>
+    </div>
+    <div id="card_freestyle" class="mode-card" onclick="selectTrainingMode('freestyle')">
+      <div class="mode-icon">🎯</div>
+      <div class="mode-title">اللعب الحر الموجه</div>
+      <div class="mode-desc">تحرك بحرية مع أوامر تكتيكية مفاجئة</div>
+    </div>
+  </div>
+
+  <div class="card" style="padding: 12px;">
+    <div class="top-status">
+      <div id="roundBadge" class="round-status status-fight">الجولة 1 - قتال</div>
+      <div id="timer" class="timer-display">03:00</div>
+      <div id="activeModePill" class="active-mode-pill">وضع التكرار</div>
+    </div>
+
+    <!-- مسرح الملاكم الميكانيكي الدقيق -->
+    <div class="stage-box">
+      <div class="stage-overlay-top">
+        <div id="liveMoveBadge" class="live-move-badge">وقفة Orthodox (اليسرى أماماً)</div>
+        <div style="display:flex; gap:6px; align-items:center;">
+          <div id="repCounterBadge" class="rep-badge">التكرار #1</div>
+          <button type="button" id="nextComboBtn" class="next-combo-btn" onclick="switchRepCombo()">تغيير ↻</button>
+        </div>
+      </div>
+
+      <canvas id="coachCanvas"></canvas>
+
+      <div class="stance-legend">
+        <span class="legend-pill" style="color:#60a5fa;">🔵 القفاز الأيسر (أمامي)</span>
+        <span class="legend-pill" style="color:#f87171;">🔴 القفاز الأيمن (خلفي)</span>
+      </div>
+    </div>
+
+    <!-- شريط تجربة اللكمات والحركات فوراً للمعاينة والتدريب الفردي -->
+    <div style="display:flex; gap:5px; overflow-x:auto; padding:4px 0 6px 0; justify-content:center; flex-wrap:wrap;">
+      <button type="button" onclick="demoMove('jab','جابْ')" style="background:#172554;color:#93c5fd;border:1px solid #1d4ed8;border-radius:7px;padding:4px 9px;font-size:0.74rem;font-weight:bold;cursor:pointer;">جاب</button>
+      <button type="button" onclick="demoMove('cross','كْرُوسْ')" style="background:#450a0a;color:#fca5a5;border:1px solid #b91c1c;border-radius:7px;padding:4px 9px;font-size:0.74rem;font-weight:bold;cursor:pointer;">كروس</button>
+      <button type="button" onclick="demoMove('left_hook','هُوكْ يَسارْ')" style="background:#172554;color:#93c5fd;border:1px solid #1d4ed8;border-radius:7px;padding:4px 9px;font-size:0.74rem;font-weight:bold;cursor:pointer;">هوك يسار</button>
+      <button type="button" onclick="demoMove('right_hook','هُوكْ يَمينْ')" style="background:#450a0a;color:#fca5a5;border:1px solid #b91c1c;border-radius:7px;padding:4px 9px;font-size:0.74rem;font-weight:bold;cursor:pointer;">هوك يمين</button>
+      <button type="button" onclick="demoMove('uppercut','أَبَرْكَتْ يَمينْ')" style="background:#450a0a;color:#fca5a5;border:1px solid #b91c1c;border-radius:7px;padding:4px 9px;font-size:0.74rem;font-weight:bold;cursor:pointer;">أبركت</button>
+      <button type="button" onclick="demoMove('body_hook','هُوكْ لِلْكَبِدْ')" style="background:#172554;color:#93c5fd;border:1px solid #1d4ed8;border-radius:7px;padding:4px 9px;font-size:0.74rem;font-weight:bold;cursor:pointer;">كبد</button>
+      <button type="button" onclick="demoMove('slip_right','سْلِيبْ يَمينْ')" style="background:#1e293b;color:#e2e8f0;border:1px solid #475569;border-radius:7px;padding:4px 9px;font-size:0.74rem;font-weight:bold;cursor:pointer;">سليب</button>
+      <button type="button" onclick="demoMove('roll','رُولْ')" style="background:#1e293b;color:#e2e8f0;border:1px solid #475569;border-radius:7px;padding:4px 9px;font-size:0.74rem;font-weight:bold;cursor:pointer;">رول</button>
+      <button type="button" onclick="demoMove('pivot_left','بِيفُوتْ يَسارْ')" style="background:#3f2e05;color:#fde047;border:1px solid #ca8a04;border-radius:7px;padding:4px 9px;font-size:0.74rem;font-weight:bold;cursor:pointer;">بيفوت</button>
+    </div>
+
+    <!-- شريط تسارع الإيقاع لوضع التكرار -->
+    <div id="tempoBarWrap" class="tempo-bar-wrap">
+      <div class="tempo-header">
+        <span id="tempoStageLabel">المرحلة 1: إتقان التكنيك</span>
+        <span id="tempoSpeedLabel">السرعة: 0.90x</span>
+      </div>
+      <div class="tempo-track">
+        <div id="tempoFill" class="tempo-fill"></div>
+      </div>
+    </div>
+
+    <div class="combo-box">
+      <div id="comboDisplay" class="combo-text">اضغط ابدأ الحصة للتدريب</div>
+      <div id="comboSub" class="combo-sub">مفاصل ذراع حقيقية • مسار دائري للهوك وصاعد للأبركت وارتكاز للبيفوت</div>
+    </div>
+
+    <div class="controls">
+      <button id="startBtn" class="main-btn" onclick="toggleTraining()">ابدأ الحصة</button>
+      <button id="bellBtn" class="main-btn" onclick="playBell()" title="جرس">🔔</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="setting-row">
+      <div class="setting-header"><span>نظام توقيت الجولات</span></div>
+      <select id="roundTimeSelect" onchange="resetTimer()">
+        <option value="180">جولات احترافية (3 دقائق قتال / 1 دقيقة راحة)</option>
+        <option value="120">جولات متوسطة (2 دقيقة قتال / 30 ثانية راحة)</option>
+      </select>
+    </div>
+
+    <div class="setting-row">
+      <div class="setting-header">
+        <span>الفاصل الأساسي بين التركيبات</span>
+        <span id="intervalVal">3.2 ثانية</span>
+      </div>
+      <input type="range" id="intervalRange" min="1.2" max="6.0" step="0.2" value="3.2" oninput="updateSettings()">
+    </div>
+
+    <div class="setting-row">
+      <div class="setting-header">
+        <span>التباعد بين حركات الكمبو</span>
+        <span id="wordGapVal">0.45 ثانية</span>
+      </div>
+      <input type="range" id="wordGapRange" min="0.05" max="1.0" step="0.05" value="0.45" oninput="updateSettings()">
+    </div>
+
+    <div class="setting-row">
+      <div class="setting-header">
+        <span>سرعة نطق المدرب وحركة الشخصية</span>
+        <span id="rateVal">0.90x</span>
+      </div>
+      <input type="range" id="rateRange" min="0.60" max="1.25" step="0.05" value="0.90" oninput="updateSettings()">
+    </div>
+
+    <div class="setting-row" style="margin-bottom:0;">
+      <div class="setting-header"><span>أضف تركيبة مخصصة (تؤديها الشخصية بالصوت والحركة)</span></div>
+      <div class="custom-add">
+        <input type="text" id="customInput" placeholder="مثال: سليب يمين، كروس، هوك يسار، أبركت يمين، بيفوت يسار" onkeydown="if(event.key==='Enter') addCustomCombo()">
+        <button class="add-btn" onclick="addCustomCombo()">إضافة</button>
+      </div>
+      <div id="customListContainer" class="custom-list"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// === 1. دعم مقاطع الفيديو الحقيقية الاختيارية (MP4/WebM) ===
+const mediaCategories = [
+  { key: 'guard', label: '1. الوقفة والاستعداد (Loop)' },
+  { key: 'jab', label: '2. لكمة الجاب (Jab)' },
+  { key: 'cross', label: '3. لكمة الكروس (Cross)' },
+  { key: 'hook', label: '4. لكمة الهوك (Hook)' },
+  { key: 'uppercut', label: '5. لكمة الأبركت (Uppercut)' },
+  { key: 'defense', label: '6. المراوغة والدفاع (Slip/Roll)' },
+  { key: 'pivot', label: '7. البيفوت والخطوات (Pivot)' }
+];
+
+let loadedVideos = {};
+let activeVideoKey = 'guard';
+let dbInstance = null;
+
+function initMediaDB() {
+  const req = indexedDB.open('BoxerVideosOnlyDB_v8', 1);
+  req.onupgradeneeded = (e) => {
+    const db = e.target.result;
+    if (!db.objectStoreNames.contains('videos')) {
+      db.createObjectStore('videos');
+    }
+  };
+  req.onsuccess = (e) => {
+    dbInstance = e.target.result;
+    loadAllSavedVideos();
+  };
+}
+
+function createVideoFromBlob(key, blob, onReady) {
+  const url = URL.createObjectURL(blob);
+  const vid = document.createElement('video');
+  vid.src = url;
+  vid.muted = true;
+  vid.playsInline = true;
+  vid.setAttribute('playsinline', '');
+  vid.setAttribute('muted', '');
+  vid.preload = 'auto';
+  vid.loop = (key === 'guard');
+
+  if (key !== 'guard') {
+    vid.onended = () => {
+      if (activeVideoKey === key) switchVideoSlot('guard', 1.0);
+    };
+  }
+
+  vid.onloadeddata = () => {
+    if (loadedVideos[key] && loadedVideos[key].url) URL.revokeObjectURL(loadedVideos[key].url);
+    loadedVideos[key] = { element: vid, url: url };
+    if (key === 'guard') vid.play().catch(() => {});
+    if (onReady) onReady();
+  };
+}
+
+function loadAllSavedVideos() {
+  if (!dbInstance) return;
+  const tx = dbInstance.transaction('videos', 'readonly');
+  const store = tx.objectStore('videos');
+  mediaCategories.forEach(cat => {
+    const getReq = store.get(cat.key);
+    getReq.onsuccess = () => {
+      if (getReq.result) createVideoFromBlob(cat.key, getReq.result, renderMediaSlotsUI);
+    };
+  });
+}
+
+function saveVideoFile(key, file) {
+  if (!file || !dbInstance) return;
+  const tx = dbInstance.transaction('videos', 'readwrite');
+  tx.objectStore('videos').put(file, key);
+  createVideoFromBlob(key, file, renderMediaSlotsUI);
+}
+
+function deleteVideoSlot(key) {
+  if (!dbInstance) return;
+  const tx = dbInstance.transaction('videos', 'readwrite');
+  tx.objectStore('videos').delete(key);
+  if (loadedVideos[key]) {
+    loadedVideos[key].element.pause();
+    URL.revokeObjectURL(loadedVideos[key].url);
+    delete loadedVideos[key];
+  }
+  renderMediaSlotsUI();
+}
+
+function clearAllMedia() {
+  if (!dbInstance) return;
+  const tx = dbInstance.transaction('videos', 'readwrite');
+  tx.objectStore('videos').clear();
+  Object.keys(loadedVideos).forEach(k => {
+    loadedVideos[k].element.pause();
+    URL.revokeObjectURL(loadedVideos[k].url);
+  });
+  loadedVideos = {};
+  renderMediaSlotsUI();
+}
+
+function toggleMediaDrawer() {
+  const d = document.getElementById('mediaDrawer');
+  d.style.display = d.style.display === 'block' ? 'none' : 'block';
+  renderMediaSlotsUI();
+}
+
+function renderMediaSlotsUI() {
+  const container = document.getElementById('poseSlotsContainer');
+  container.innerHTML = mediaCategories.map(cat => {
+    const item = loadedVideos[cat.key];
+    return `
+      <div class="pose-slot">
+        <div class="pose-slot-header">
+          <span>${cat.label}</span>
+          <span class="pose-status ${item ? 'loaded-vid' : ''}">${item ? '🎬 فيديو مفعّل' : 'مدمج'}</span>
+        </div>
+        <div class="slot-actions">
+          <label class="pose-btn">
+            ${item ? 'تغيير' : '+ اختر فيديو'}
+            <input type="file" accept="video/*" style="display:none" onchange="saveVideoFile('${cat.key}', this.files[0])">
+          </label>
+          ${item ? `<button type="button" class="slot-del-btn" onclick="deleteVideoSlot('${cat.key}')">✕</button>` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function mapActionToVideoSlot(act) {
+  if (act === 'jab' || act === 'double_jab' || act === 'body_jab') return 'jab';
+  if (act === 'cross' || act === 'overhand') return 'cross';
+  if (act === 'left_hook' || act === 'right_hook' || act === 'body_hook') return 'hook';
+  if (act === 'uppercut' || act === 'left_uppercut') return 'uppercut';
+  if (act === 'slip_right' || act === 'slip_left' || act === 'roll' || act === 'duck' || act === 'pull_back' || act === 'block' || act === 'parry') return 'defense';
+  if (act === 'pivot_left' || act === 'pivot_right' || act === 'step_in' || act === 'step_back' || act === 'step_side_r' || act === 'step_side_l' || act === 'feint') return 'pivot';
+  return 'guard';
+}
+
+function switchVideoSlot(desiredKey, playbackRate = 1.0) {
+  const key = loadedVideos[desiredKey] ? desiredKey : (loadedVideos.guard ? 'guard' : null);
+  if (!key) return;
+  activeVideoKey = key;
+  const vid = loadedVideos[key].element;
+  vid.playbackRate = Math.min(2.0, Math.max(0.65, playbackRate));
+  if (key !== 'guard') vid.currentTime = 0;
+  vid.play().catch(() => {});
+}
+
+initMediaDB();
+
+// === 2. بيانات التركيبات التدريبية ===
+const repetitionCombos = [
+  {
+    text: "خطوة للأمام، جاب، كروس، سليب يمين، كروس، هوك يسار، خطوة للخلف",
+    speak: "خُطْوَة لِلْأَمامْ، جابْ، كْرُوسْ، سْلِيبْ يَمينْ، كْرُوسْ، هُوكْ يَسارْ، خُطْوَة لِلْخَلْفْ",
+    sub: "دخول • هجوم مزدوج • سليب ويمين وهوك • انسحاب"
+  },
+  {
+    text: "دبل جاب، كروس، رول يسار، هوك يسار، كروس، بيفوت يسار",
+    speak: "دَبَلْ جابْ، كْرُوسْ، رُولْ يَسارْ، هُوكْ يَسارْ، كْرُوسْ، بِيفُوتْ يَسارْ",
+    sub: "فتح المسافة • رول تحت الهوك • رد والتفاف"
+  },
+  {
+    text: "جاب، سليب يسار، هوك يسار للكبد، هوك يسار للرأس، كروس، خطوة للخلف",
+    speak: "جابْ، سْلِيبْ يَسارْ، هُوكْ يَسارْ لِلْكَبِدْ، هُوكْ يَسارْ لِلرَّأْسْ، كْرُوسْ، خُطْوَة لِلْخَلْفْ",
+    sub: "تغيير مستوى (كبد ثم رأس) • إنهاء بكروس"
+  },
+  {
+    text: "جاب للبطن، كروس للرأس، تغطيس، خطوة جانبية يمين، أبركت يمين، هوك يسار",
+    speak: "جابْ لِلْبَطْنْ، كْرُوسْ لِلرَّأْسْ، تَغْطيسْ، خُطْوَة جانِبِيَّة يَمينْ، أَبَرْكَتْ يَمينْ، هُوكْ يَسارْ",
+    sub: "خداع مستوى • تغطيس وزاوية يمين • أبركت وهوك"
+  },
+  {
+    text: "جاب، كروس، بول باك، كروس، هوك يسار، بيفوت يمين، كروس",
+    speak: "جابْ، كْرُوسْ، بُولْ باكْ، كْرُوسْ، هُوكْ يَسارْ، بِيفُوتْ يَمينْ، كْرُوسْ",
+    sub: "هجوم • سحب الرأس للخلف • رد والتفاف يمين"
+  }
+];
+
+const counterCombos = [
+  {
+    text: "سليب يمين، كروس، هوك يسار، كروس",
+    speak: "سْلِيبْ يَمينْ، كْرُوسْ، هُوكْ يَسارْ، كْرُوسْ",
+    sub: "تفادي الجاب لليمين ورد ثلاثي خاطف"
+  },
+  {
+    text: "سليب يسار، هوك يسار للكبد، هوك يسار للرأس، كروس",
+    speak: "سْلِيبْ يَسارْ، هُوكْ يَسارْ لِلْكَبِدْ، هُوكْ يَسارْ لِلرَّأْسْ، كْرُوسْ",
+    sub: "تفادي الكروس لليسار ومعاقبة الكبد والرأس"
+  },
+  {
+    text: "رول يسار، أبركت يمين، هوك يسار، بيفوت يسار",
+    speak: "رُولْ يَسارْ، أَبَرْكَتْ يَمينْ، هُوكْ يَسارْ، بِيفُوتْ يَسارْ",
+    sub: "الغوص تحت الهوك والرد بأبركت والتفاف"
+  },
+  {
+    text: "بول باك، كروس، هوك يسار، خطوة للخلف",
+    speak: "بُولْ باكْ، كْرُوسْ، هُوكْ يَسارْ، خُطْوَة لِلْخَلْفْ",
+    sub: "سحب الرأس للخلف واستغلال اندفاع الخصم"
+  },
+  {
+    text: "بلوك بالكتف، كروس، أبركت يسار، كروس",
+    speak: "بْلُوكْ بالْكَتِفْ، كْرُوسْ، أَبَرْكَتْ يَسارْ، كْرُوسْ",
+    sub: "امتصاص الضربة بالكتف والانفجار باليمين"
+  },
+  {
+    text: "باري، جاب، كروس، هوك يسار",
+    speak: "بارِي، جابْ، كْرُوسْ، هُوكْ يَسارْ",
+    sub: "إبعاد جاب الخصم بالكف والرد الفوري"
+  },
+  {
+    text: "تغطيس، أوفرهاند يمين، هوك يسار، بيفوت يمين",
+    speak: "تَغْطيسْ، أُوفَرْهانْدْ يَمينْ، هُوكْ يَسارْ، بِيفُوتْ يَمينْ",
+    sub: "تغيير مستوى والرد بأوفرهاند فوق يد الخصم"
+  }
+];
+
+const freestyleCues = [
+  {
+    text: "بيفوت يسار",
+    speak: "غَيِّرْ الزَّاوِيَة فَوْراً، بِيفُوتْ يَسارْ",
+    sub: "غيّر الزاوية فوراً ولا تبقَ في خط الهجوم"
+  },
+  {
+    text: "هوك يسار للكبد",
+    speak: "اضْرِبْ لِلْجِسْمْ الآنْ، هُوكْ يَسارْ لِلْكَبِدْ",
+    sub: "استهدف منطقة البطن والأضلاع"
+  },
+  {
+    text: "تحرك دائري، جاب",
+    speak: "تَحَرَّكْ دائِرِي، جابْ",
+    sub: "تحكم بإيقاع الحلبة وافتح المسافة"
+  },
+  {
+    text: "سليب يمين، سليب يسار",
+    speak: "حَرِّكْ راسَكْ، سْلِيبْ يَمينْ، سْلِيبْ يَسارْ",
+    sub: "لا تجعل رأسك هدفاً ثابتاً"
+  },
+  {
+    text: "هوك يسار، هوك يمين، هوك يسار",
+    speak: "انْفِجارْ سَريعْ، هُوكْ يَسارْ، هُوكْ يَمينْ، هُوكْ يَسارْ",
+    sub: "هوكات متتالية بأقصى سرعة"
+  },
+  {
+    text: "خداع، كروس",
+    speak: "خِداعْ، كْرُوسْ",
+    sub: "موه بالكتف واسحب رد فعل الخصم"
+  },
+  {
+    text: "خطوة جانبية يمين، كروس",
+    speak: "خُطْوَة جانِبِيَّة يَمينْ، كْرُوسْ",
+    sub: "اخرج من الزاوية واضرب"
+  },
+  {
+    text: "تغطيس، بيفوت يمين",
+    speak: "تَغْطيسْ، بِيفُوتْ يَمينْ",
+    sub: "دفاع وتغيير اتجاه"
+  }
+];
+
+function formatCustomBoxingTerms(text) {
+  const dict = [
+    [/دبل جاب/g, "دَبَلْ جابْ"],
+    [/جاب/g, "جابْ"],
+    [/كروس/g, "كْرُوسْ"],
+    [/هوك/g, "هُوكْ"],
+    [/أبركت|ابركت/g, "أَبَرْكَتْ"],
+    [/أوفرهاند|اوفرهاند/g, "أُوفَرْهانْدْ"],
+    [/سليب|اسلب|سلب/g, "سْلِيبْ"],
+    [/رول/g, "رُولْ"],
+    [/بول باك/g, "بُولْ باكْ"],
+    [/بلوك/g, "بْلُوكْ"],
+    [/باري/g, "بارِي"],
+    [/بيفوت/g, "بِيفُوتْ"],
+    [/داك/g, "تَغْطيسْ"]
+  ];
+  let res = text;
+  dict.forEach(([p, r]) => { res = res.replace(p, r); });
+
+  return res.split(/(\s+)/).map(token => {
+    if (!token.trim()) return token;
+    const match = token.match(/^([^،,.!؟]+)([،,.!؟]*)$/);
+    if (!match) return token;
+    let word = match[1];
+    const punct = match[2];
+    word = word.replace(/[ًٌٍَُِْ]$/, '');
+    if (!/[اويىةْ]$/.test(word)) word = word + 'ْ';
+    return word + punct;
+  }).join('');
+}
+
+// === 3. محرك الميكانيكا الحيوية المتقدم للملاكم (Orthodox Stance: متجه لليمين ->) ===
+// الرجل اليسرى (Lead Left) في المقدمة (يمين الشاشة) والقفاز الأيسر أزرق
+// الرجل اليمنى (Rear Right) في الخلف (يسار الشاشة) والقفاز الأيمن أحمر
+const canvas = document.getElementById('coachCanvas');
+const ctx = canvas.getContext('2d');
+
+let anim = {
+  action: 'idle',
+  phase: 1.0,
+  speed: 0.042,
+  time: 0,
+  label: 'وقفة Orthodox (اليسرى أماماً)',
+  dust: [],
+  gloveTrailL: [],
+  gloveTrailR: []
+};
+
+// حالة مفاصل الجسم الملساء (Continuous Pose Interpolation لمنع أي قفز مفاجئ بين الحركات)
+let smoothPose = {
+  baseXOff: 0,
+  hipYOff: 0,
+  kneeBend: 0,
+  torsoRot: 0,
+  torsoLean: 0,
+  headX: 0,
+  headY: 0,
+  lFootX: 58,
+  lFootY: 0,
+  lFootAng: 0.1,
+  rFootX: -58,
+  rFootY: -22,
+  rFootAng: -0.25,
+  lHandX: 34,
+  lHandY: 6,
+  lHandR: 21,
+  lHandRot: -0.15,
+  lElX: 8,
+  lElY: 44,
+  rHandX: -4,
+  rHandY: 6,
+  rHandR: 20,
+  rHandRot: 0.15,
+  rElX: -6,
+  rElY: 44
+};
+
+function parseMoveFromArabic(phrase) {
+  const clean = phrase.replace(/[ًٌٍَُِّْ]/g, '').trim();
+  if (clean.includes('دبل جاب')) return 'double_jab';
+  if (clean.includes('جاب')) return clean.includes('للبطن') || clean.includes('للجسم') ? 'body_jab' : 'jab';
+  if (clean.includes('كروس')) return 'cross';
+  if (clean.includes('اوفرهاند') || clean.includes('أوفرهاند')) return 'overhand';
+  if (clean.includes('هوك')) {
+    if (clean.includes('للكبد') || clean.includes('للبطن') || clean.includes('للجسم')) return 'body_hook';
+    if (clean.includes('يمين')) return 'right_hook';
+    return 'left_hook';
+  }
+  if (clean.includes('ابركت') || clean.includes('أبركت')) {
+    return clean.includes('يسار') ? 'left_uppercut' : 'uppercut';
+  }
+  if (clean.includes('سليب')) {
+    return clean.includes('يسار') ? 'slip_left' : 'slip_right';
+  }
+  if (clean.includes('رول')) return 'roll';
+  if (clean.includes('تغطيس')) return 'duck';
+  if (clean.includes('بول باك')) return 'pull_back';
+  if (clean.includes('بلوك')) return 'block';
+  if (clean.includes('باري')) return 'parry';
+  if (clean.includes('بيفوت')) {
+    return clean.includes('يمين') ? 'pivot_right' : 'pivot_left';
+  }
+  if (clean.includes('للأمام') || clean.includes('للامام') || clean.includes('ادخل')) return 'step_in';
+  if (clean.includes('للخلف') || clean.includes('ارجع')) return 'step_back';
+  if (clean.includes('جانبية') || clean.includes('دائري')) {
+    return clean.includes('يسار') ? 'step_side_l' : 'step_side_r';
+  }
+  if (clean.includes('خداع')) return 'feint';
+  return 'idle';
+}
+
+function spawnFloorDust(x, y, count = 6) {
+  for (let i = 0; i < count; i++) {
+    anim.dust.push({
+      x: x + (Math.random() - 0.5) * 24,
+      y: y + (Math.random() - 0.5) * 8,
+      vx: (Math.random() - 0.5) * 2.2,
+      vy: -0.4 - Math.random() * 1.2,
+      r: 3 + Math.random() * 5,
+      alpha: 0.55
+    });
+  }
+}
+
+function triggerCharacterAction(actionCode, labelText, rate = 1.0) {
+  anim.action = actionCode;
+  anim.phase = 0.001;
+  anim.speed = 0.038 * rate;
+  anim.label = labelText;
+
+  const badge = document.getElementById('liveMoveBadge');
+  badge.innerText = labelText;
+  badge.style.background = actionCode === 'idle' ? 'rgba(42, 157, 143, 0.9)' : 'rgba(230, 57, 70, 0.92)';
+
+  const desiredSlot = mapActionToVideoSlot(actionCode);
+  switchVideoSlot(desiredSlot, rate);
+}
+
+// تجربة أي حركة بلمسة زر للمعاينة والتدريب الفردي
+function demoMove(actionCode, labelText) {
+  triggerCharacterAction(actionCode, labelText, 0.85);
+  const utter = new SpeechSynthesisUtterance(labelText);
+  utter.lang = 'ar-SA';
+  utter.rate = 0.95;
+  window.speechSynthesis.cancel();
+  window.speechSynthesis.speak(utter);
+}
+
+function resizeCanvas() {
+  const rect = canvas.parentElement.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+function drawGymStage(w, h) {
+  const bg = ctx.createRadialGradient(w * 0.5, h * 0.22, 10, w * 0.5, h * 0.55, Math.max(w, h) * 0.85);
+  bg.addColorStop(0, '#2a241c');
+  bg.addColorStop(0.55, '#12151e');
+  bg.addColorStop(1, '#06080c');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, w, h);
+
+  // إضاءة كشاف علوية
+  const beam = ctx.createLinearGradient(w * 0.5, 0, w * 0.5, h * 0.88);
+  beam.addColorStop(0, 'rgba(255, 235, 190, 0.15)');
+  beam.addColorStop(1, 'rgba(255, 235, 190, 0)');
+  ctx.fillStyle = beam;
+  ctx.beginPath();
+  ctx.moveTo(w * 0.34, 0);
+  ctx.lineTo(w * 0.66, 0);
+  ctx.lineTo(w * 0.9, h * 0.88);
+  ctx.lineTo(w * 0.1, h * 0.88);
+  ctx.closePath();
+  ctx.fill();
+
+  // حبال الحلبة
+  const ropes = [h * 0.26, h * 0.38, h * 0.50];
+  const colors = ['#ef4444', '#f8fafc', '#3b82f6'];
+  ropes.forEach((y, i) => {
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.quadraticCurveTo(w * 0.5, y + 6, w, y);
+    ctx.strokeStyle = colors[i];
+    ctx.lineWidth = 3.5;
+    ctx.globalAlpha = 0.42;
+    ctx.stroke();
+    ctx.globalAlpha = 1.0;
+  });
+
+  // أرضية الحلبة
+  const floorY = h * 0.64;
+  const floorGrad = ctx.createLinearGradient(0, floorY, 0, h);
+  floorGrad.addColorStop(0, '#1e222b');
+  floorGrad.addColorStop(1, '#0b0d13');
+  ctx.fillStyle = floorGrad;
+  ctx.fillRect(0, floorY, w, h - floorY);
+
+  // خط المنتصف المرجعي الرأسي الخفيف (لإظهار خروج الرأس في السليب والرول)
+  ctx.save();
+  ctx.strokeStyle = 'rgba(148, 163, 184, 0.12)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([4, 6]);
+  ctx.beginPath();
+  ctx.moveTo(w * 0.46, h * 0.14);
+  ctx.lineTo(w * 0.46, h * 0.86);
+  ctx.stroke();
+  ctx.restore();
+}
+
+function drawShadedLimb(x1, y1, x2, y2, r1, r2, isSkin = true, isFront = true) {
+  const angle = Math.atan2(y2 - y1, x2 - x1);
+  const perp = angle + Math.PI / 2;
+  const p1x = x1 + Math.cos(perp) * r1, p1y = y1 + Math.sin(perp) * r1;
+  const p2x = x2 + Math.cos(perp) * r2, p2y = y2 + Math.sin(perp) * r2;
+  const p3x = x2 - Math.cos(perp) * r2, p3y = y2 - Math.sin(perp) * r2;
+  const p4x = x1 - Math.cos(perp) * r1, p4y = y1 - Math.sin(perp) * r1;
+
+  const grad = ctx.createLinearGradient(p1x, p1y, p4x, p4y);
+  if (isSkin) {
+    if (isFront) {
+      grad.addColorStop(0, '#f3c19d');
+      grad.addColorStop(0.5, '#c67f50');
+      grad.addColorStop(1, '#7a4422');
+    } else {
+      grad.addColorStop(0, '#c67f50');
+      grad.addColorStop(0.5, '#9e5e36');
+      grad.addColorStop(1, '#5c3116');
+    }
+  } else {
+    grad.addColorStop(0, '#1e293b');
+    grad.addColorStop(0.5, '#0f172a');
+    grad.addColorStop(1, '#020617');
+  }
+
+  ctx.beginPath();
+  ctx.moveTo(p1x, p1y);
+  ctx.lineTo(p2x, p2y);
+  ctx.arc(x2, y2, r2, perp, perp + Math.PI, false);
+  ctx.lineTo(p4x, p4y);
+  ctx.arc(x1, y1, r1, perp + Math.PI, perp, false);
+  ctx.closePath();
+  ctx.fillStyle = grad;
+  ctx.fill();
+  ctx.strokeStyle = isSkin ? '#42200b' : '#020617';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+}
+
+function drawBoxingBoot(x, y, isFront, angle = 0) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(angle);
+
+  ctx.fillStyle = isFront ? '#1e293b' : '#0f172a';
+  ctx.strokeStyle = '#374151';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.roundRect(-9, -22, 18, 26, 4);
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.fillStyle = isFront ? '#334155' : '#1f2937';
+  ctx.beginPath();
+  ctx.ellipse(5, 5, 17, 7, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.strokeStyle = '#9ca3af';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(-10, 10);
+  ctx.lineTo(20, 10);
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+function drawGloveTrail(trail, isBlue) {
+  if (trail.length < 2) return;
+  for (let i = 0; i < trail.length - 1; i++) {
+    const pt = trail[i];
+    const ratio = (i + 1) / trail.length;
+    ctx.save();
+    ctx.globalAlpha = ratio * 0.22;
+    ctx.fillStyle = isBlue ? '#38bdf8' : '#ef4444';
+    ctx.beginPath();
+    ctx.arc(pt.x, pt.y, pt.r * (0.65 + ratio * 0.3), 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+}
+
+function drawBoxingGlove(x, y, r, isBlueLeftGlove, punchPower = 0, rot = 0) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(rot);
+
+  // موجة صدمة عند ذروة اللكمة
+  if (punchPower > 0.72) {
+    const ringScale = 1.0 + (punchPower - 0.72) * 2.2;
+    ctx.strokeStyle = isBlueLeftGlove ? `rgba(56, 189, 248, ${(1 - punchPower) * 2.5})` : `rgba(251, 191, 36, ${(1 - punchPower) * 2.5})`;
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(r * 0.6, 0, r * ringScale, -0.9, 0.9);
+    ctx.stroke();
+  }
+
+  // معصم القفاز
+  ctx.fillStyle = isBlueLeftGlove ? '#1e3a8a' : '#7f1d1d';
+  ctx.beginPath();
+  ctx.roundRect(-r * 1.05, -r * 0.45, r * 0.65, r * 0.9, 5);
+  ctx.fill();
+  ctx.fillStyle = '#f8fafc';
+  ctx.fillRect(-r * 0.85, -r * 0.42, r * 0.16, r * 0.84);
+
+  // جسم القفاز الجلدي
+  const gGrad = ctx.createRadialGradient(r * 0.15, -r * 0.25, r * 0.08, 0, 0, r * 1.1);
+  if (isBlueLeftGlove) {
+    gGrad.addColorStop(0, '#93c5fd');
+    gGrad.addColorStop(0.35, '#2563eb');
+    gGrad.addColorStop(0.8, '#1e40af');
+    gGrad.addColorStop(1, '#172554');
+  } else {
+    gGrad.addColorStop(0, '#fca5a5');
+    gGrad.addColorStop(0.35, '#dc2626');
+    gGrad.addColorStop(0.8, '#991b1b');
+    gGrad.addColorStop(1, '#450a0a');
+  }
+
+  ctx.beginPath();
+  ctx.ellipse(r * 0.1, 0, r * 0.96, r * 0.84, 0, 0, Math.PI * 2);
+  ctx.fillStyle = gGrad;
+  ctx.fill();
+  ctx.strokeStyle = isBlueLeftGlove ? '#172554' : '#450a0a';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // الإبهام المضموم
+  ctx.beginPath();
+  ctx.ellipse(0, r * 0.55, r * 0.45, r * 0.26, -0.2, 0, Math.PI * 2);
+  ctx.fillStyle = isBlueLeftGlove ? '#1d4ed8' : '#b91c1c';
+  ctx.fill();
+
+  ctx.restore();
+}
+
+function drawMotionGuide(guide) {
+  if (!guide || guide.alpha <= 0.08) return;
+  ctx.save();
+  ctx.globalAlpha = guide.alpha * 0.9;
+  ctx.lineCap = 'round';
+
+  if (guide.type === 'straight') {
+    ctx.strokeStyle = guide.color || '#38bdf8';
+    ctx.lineWidth = 3;
+    ctx.setLineDash([6, 6]);
+    ctx.beginPath();
+    ctx.moveTo(guide.x1, guide.y1);
+    ctx.lineTo(guide.x2, guide.y2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  } else if (guide.type === 'hook') {
+    ctx.strokeStyle = '#ffb703';
+    ctx.fillStyle = '#ffb703';
+    ctx.lineWidth = 4.5;
+    ctx.beginPath();
+    ctx.moveTo(guide.x1, guide.y1);
+    ctx.quadraticCurveTo(guide.cx, guide.cy, guide.x2, guide.y2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(guide.x2, guide.y2, 6, 0, Math.PI * 2);
+    ctx.fill();
+  } else if (guide.type === 'uppercut') {
+    ctx.strokeStyle = '#ffb703';
+    ctx.fillStyle = '#ffb703';
+    ctx.lineWidth = 4.5;
+    ctx.beginPath();
+    ctx.moveTo(guide.x, guide.y1);
+    ctx.lineTo(guide.x, guide.y2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(guide.x, guide.y2 - 10);
+    ctx.lineTo(guide.x - 8, guide.y2 + 5);
+    ctx.lineTo(guide.x + 8, guide.y2 + 5);
+    ctx.closePath();
+    ctx.fill();
+  } else if (guide.type === 'pivot') {
+    ctx.strokeStyle = '#38bdf8';
+    ctx.lineWidth = 3.5;
+    ctx.shadowColor = '#38bdf8';
+    ctx.shadowBlur = 10;
+    ctx.beginPath();
+    ctx.ellipse(guide.cx, guide.cy + 5, 25, 9, 0, 0, Math.PI * 2);
+    ctx.stroke();
+
+    ctx.strokeStyle = '#facc15';
+    ctx.shadowColor = '#facc15';
+    ctx.shadowBlur = 12;
+    ctx.lineWidth = 5;
+    ctx.beginPath();
+    ctx.ellipse(guide.cx, guide.cy + 5, guide.rx, guide.ry, 0, guide.a1, guide.a2, guide.ccw);
+    ctx.stroke();
+
+    const endX = guide.cx + Math.cos(guide.a2) * guide.rx;
+    const endY = guide.cy + 5 + Math.sin(guide.a2) * guide.ry;
+    ctx.fillStyle = '#facc15';
+    ctx.beginPath();
+    ctx.arc(endX, endY, 7, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+// منحنى انفجاري واقعي: انطلاق خاطف (Snap)، ثبات قصير عند الإصابة، وارتداد سريع للحماية
+function punchSnapCurve(t) {
+  if (t <= 0 || t >= 1) return 0;
+  if (t < 0.22) {
+    // انطلاق متسارع (Ease-Out Cubic)
+    const x = t / 0.22;
+    return 1 - Math.pow(1 - x, 3);
+  } else if (t < 0.68) {
+    // ذروة اللكمة
+    return 1.0;
+  } else {
+    // ارتداد سريع للحماية (Ease-In-Out)
+    const x = (t - 0.68) / 0.32;
+    return 1 - (x * x * (3 - 2 * x));
+  }
+}
+
+function lerp(a, b, f) {
+  return a + (b - a) * f;
+}
+
+function renderBoxerCanvas() {
+  const rect = canvas.parentElement.getBoundingClientRect();
+  const w = rect.width;
+  const h = rect.height;
+
+  // إذا رفع المستخدم فيديو MP4 مخصص، نعرضه
+  if (Object.keys(loadedVideos).length > 0 && loadedVideos[activeVideoKey]) {
+    const vid = loadedVideos[activeVideoKey].element;
+    if (vid.videoWidth && vid.videoHeight) {
+      ctx.fillStyle = '#07090e';
+      ctx.fillRect(0, 0, w, h);
+      const r = Math.min(w / vid.videoWidth, h / vid.videoHeight);
+      const dw = vid.videoWidth * r, dh = vid.videoHeight * r;
+      ctx.drawImage(vid, (w - dw) * 0.5, (h - dh) * 0.5, dw, dh);
+      requestAnimationFrame(renderBoxerCanvas);
+      return;
+    }
+  }
+
+  drawGymStage(w, h);
+
+  anim.time += 0.068;
+  const act = anim.action;
+
+  if (act !== 'idle' && anim.phase < 1.0) {
+    anim.phase = Math.min(1.0, anim.phase + anim.speed);
+    if (anim.phase >= 1.0) {
+      anim.action = 'idle';
+    }
+  }
+
+  let p = punchSnapCurve(anim.phase);
+  if (act === 'double_jab') {
+    // دبل جاب: نبضتان متلاحقتان سريعتان!
+    const t = anim.phase;
+    if (t < 0.45) {
+      p = punchSnapCurve(t / 0.45);
+    } else {
+      p = punchSnapCurve((t - 0.45) / 0.55);
+    }
+  }
+
+  // حركة الاستعداد المستمرة (Pendulum Footwork Bounce)
+  const bounce = Math.sin(anim.time * 3.2) * 3.2;
+  const sway = Math.cos(anim.time * 1.6) * 2.8;
+
+  const anchorX = w * 0.44 + sway;
+  const floorBaseY = h * 0.87;
+  const hipBaseY = h * 0.50 + bounce;
+
+  // الأهداف الحسابية للحركة الحالية (Target Pose)
+  let tBaseXOff = 0;
+  let tHipYOff = 0;
+  let tKneeBend = 0;
+  let tTorsoRot = 0;
+  let tTorsoLean = 0;
+  let tHeadX = 0;
+  let tHeadY = 0;
+
+  let tLFootX = 58, tLFootY = 0, tLFootAng = 0.08;
+  let tRFootX = -58, tRFootY = -22, tRFootAng = -0.25;
+
+  let guide = null;
+  let activePunchPowerL = 0;
+  let activePunchPowerR = 0;
+
+  // === حساب أهداف الجسم والقدمين ===
+  if (act === 'jab' || act === 'double_jab') {
+    tTorsoRot = 0.62 * p;
+    tTorsoLean = 0.08 * p;
+    tHeadX = -6 * p; // سحب الرأس قليلاً للخلف عن خط الهجوم المضاد أثناء الجاب
+    tLFootX = 58 + 16 * p;
+    tBaseXOff = 10 * p;
+    activePunchPowerL = p;
+    if (p > 0.2 && anim.phase < 0.12) spawnFloorDust(anchorX + tLFootX, floorBaseY, 2);
+  } else if (act === 'body_jab') {
+    tKneeBend = 34 * p;
+    tTorsoRot = 0.6 * p;
+    tTorsoLean = 0.14 * p;
+    tLFootX = 58 + 22 * p;
+    tBaseXOff = 12 * p;
+    activePunchPowerL = p;
+  } else if (act === 'cross') {
+    // كروس يمين: دوران كامل للورك والكتف الأيمن وتدوير كعب القدم الخلفية
+    tTorsoRot = -0.95 * p;
+    tTorsoLean = 0.14 * p;
+    tRFootAng = 0.35 * p;
+    tRFootX = -58 + 10 * p;
+    tHeadX = 18 * p;
+    tBaseXOff = 14 * p;
+    activePunchPowerR = p;
+    if (p > 0.2 && anim.phase < 0.12) spawnFloorDust(anchorX + tRFootX, floorBaseY + tRFootY, 3);
+  } else if (act === 'overhand') {
+    tTorsoRot = -0.95 * p;
+    tTorsoLean = 0.22 * p;
+    tKneeBend = 18 * p;
+    tHeadX = 24 * p;
+    tRFootAng = 0.35 * p;
+    activePunchPowerR = p;
+  } else if (act === 'left_hook') {
+    // هوك يسار: تدوير القدم الأمامية وسحب الكتف الأيسر لتوليد عزم أفقي
+    tTorsoRot = -0.82 * p;
+    tLFootAng = 0.65 * p;
+    tHeadX = -10 * p;
+    activePunchPowerL = p;
+    if (p > 0.2 && anim.phase < 0.12) spawnFloorDust(anchorX + tLFootX, floorBaseY, 3);
+  } else if (act === 'right_hook') {
+    tTorsoRot = 0.88 * p;
+    tRFootAng = 0.35 * p;
+    tHeadX = 12 * p;
+    activePunchPowerR = p;
+  } else if (act === 'body_hook') {
+    tKneeBend = 38 * p;
+    tTorsoRot = -0.78 * p;
+    tTorsoLean = 0.16 * p;
+    tLFootX = 58 + 16 * p;
+    tLFootAng = 0.55 * p;
+    activePunchPowerL = p;
+  } else if (act === 'uppercut') {
+    tKneeBend = 22 * (1 - p);
+    tTorsoRot = -0.78 * p;
+    tTorsoLean = -0.06 * p;
+    tRFootAng = 0.25 * p;
+    activePunchPowerR = p;
+  } else if (act === 'left_uppercut') {
+    tKneeBend = 22 * (1 - p);
+    tTorsoRot = 0.65 * p;
+    tTorsoLean = -0.05 * p;
+    activePunchPowerL = p;
+  } else if (act === 'slip_right') {
+    tHeadX = -34 * p;
+    tHeadY = 14 * p;
+    tTorsoLean = -0.18 * p;
+    tKneeBend = 16 * p;
+  } else if (act === 'slip_left') {
+    tHeadX = 36 * p;
+    tHeadY = 14 * p;
+    tTorsoLean = 0.18 * p;
+    tKneeBend = 16 * p;
+  } else if (act === 'roll') {
+    const uWave = Math.sin(anim.phase * Math.PI);
+    tKneeBend = 46 * uWave;
+    tHeadX = Math.cos(anim.phase * Math.PI) * 34;
+    tTorsoLean = Math.cos(anim.phase * Math.PI) * 0.16;
+  } else if (act === 'duck') {
+    tKneeBend = 48 * p;
+    tHeadY = 14 * p;
+  } else if (act === 'pull_back') {
+    tBaseXOff = -28 * p;
+    tHeadX = -24 * p;
+    tTorsoLean = -0.16 * p;
+  } else if (act === 'block') {
+    tTorsoRot = 0.45 * p;
+    tKneeBend = 12 * p;
+  } else if (act === 'parry') {
+    tTorsoRot = 0.35 * p;
+  } else if (act === 'pivot_left') {
+    const startAng = Math.PI * 1.08;
+    const endAng = Math.PI * 0.42;
+    const curAng = startAng + (endAng - startAng) * p;
+    const rx = 114, ry = 30;
+    tRFootX = tLFootX + Math.cos(curAng) * rx;
+    tRFootY = tLFootY + Math.sin(curAng) * ry;
+    tBaseXOff = (tLFootX + tRFootX) * 0.5;
+    tTorsoRot = -0.65 * p;
+    if (p > 0.15 && p < 0.85 && Math.random() < 0.45) {
+      spawnFloorDust(anchorX + tRFootX, floorBaseY + tRFootY, 1);
+    }
+    guide = { type: 'pivot', cx: anchorX + tLFootX, cy: floorBaseY + tLFootY, rx: rx, ry: ry, a1: startAng, a2: curAng, ccw: true, alpha: p };
+  } else if (act === 'pivot_right') {
+    const startAng = Math.PI * 1.08;
+    const endAng = Math.PI * 1.65;
+    const curAng = startAng + (endAng - startAng) * p;
+    const rx = 114, ry = 30;
+    tRFootX = tLFootX + Math.cos(curAng) * rx;
+    tRFootY = tLFootY + Math.sin(curAng) * ry;
+    tBaseXOff = (tLFootX + tRFootX) * 0.5;
+    tTorsoRot = 0.68 * p;
+    if (p > 0.15 && p < 0.85 && Math.random() < 0.45) {
+      spawnFloorDust(anchorX + tRFootX, floorBaseY + tRFootY, 1);
+    }
+    guide = { type: 'pivot', cx: anchorX + tLFootX, cy: floorBaseY + tLFootY, rx: rx, ry: ry, a1: startAng, a2: curAng, ccw: false, alpha: p };
+  } else if (act === 'step_in') {
+    tBaseXOff = 36 * p;
+    tLFootX = 58 + 36 * p;
+    tRFootX = -58 + 36 * p;
+    if (p > 0.2 && anim.phase < 0.12) spawnFloorDust(anchorX + tLFootX, floorBaseY, 3);
+  } else if (act === 'step_back') {
+    tBaseXOff = -36 * p;
+    tLFootX = 58 - 36 * p;
+    tRFootX = -58 - 36 * p;
+    if (p > 0.2 && anim.phase < 0.12) spawnFloorDust(anchorX + tRFootX, floorBaseY + tRFootY, 3);
+  } else if (act === 'step_side_r') {
+    tHipYOff = 16 * p;
+    tLFootY = 16 * p;
+    tRFootY = -22 + 16 * p;
+  } else if (act === 'step_side_l') {
+    tHipYOff = -16 * p;
+    tLFootY = -16 * p;
+    tRFootY = -22 - 16 * p;
+  } else if (act === 'feint') {
+    const f = Math.sin(anim.phase * Math.PI);
+    tTorsoRot = 0.45 * f;
+    tKneeBend = 12 * f;
+  }
+
+  // استيفاء سلس للمفاصل (Smooth Damping) لإزالة أي خشونة
+  const fSmooth = 0.36;
+  smoothPose.baseXOff = lerp(smoothPose.baseXOff, tBaseXOff, fSmooth);
+  smoothPose.hipYOff = lerp(smoothPose.hipYOff, tHipYOff, fSmooth);
+  smoothPose.kneeBend = lerp(smoothPose.kneeBend, tKneeBend, fSmooth);
+  smoothPose.torsoRot = lerp(smoothPose.torsoRot, tTorsoRot, fSmooth);
+  smoothPose.torsoLean = lerp(smoothPose.torsoLean, tTorsoLean, fSmooth);
+  smoothPose.headX = lerp(smoothPose.headX, tHeadX, fSmooth);
+  smoothPose.headY = lerp(smoothPose.headY, tHeadY, fSmooth);
+  smoothPose.lFootX = lerp(smoothPose.lFootX, tLFootX, fSmooth);
+  smoothPose.lFootY = lerp(smoothPose.lFootY, tLFootY, fSmooth);
+  smoothPose.lFootAng = lerp(smoothPose.lFootAng, tLFootAng, fSmooth);
+  smoothPose.rFootX = lerp(smoothPose.rFootX, tRFootX, fSmooth);
+  smoothPose.rFootY = lerp(smoothPose.rFootY, tRFootY, fSmooth);
+  smoothPose.rFootAng = lerp(smoothPose.rFootAng, tRFootAng, fSmooth);
+
+  const baseX = anchorX + smoothPose.baseXOff;
+  const hipY = hipBaseY + smoothPose.hipYOff + smoothPose.kneeBend;
+  const leftFoot = { x: anchorX + smoothPose.lFootX, y: floorBaseY + smoothPose.lFootY, angle: smoothPose.lFootAng };
+  const rightFoot = { x: anchorX + smoothPose.rFootX, y: floorBaseY + smoothPose.rFootY, angle: smoothPose.rFootAng };
+
+  // رسم حلقة البيفوت على الأرضية
+  if (guide && guide.type === 'pivot') {
+    drawMotionGuide(guide);
+  }
+
+  // رسم ذرات غبار الحلبة تحت القدمين
+  anim.dust.forEach(d => {
+    ctx.save();
+    ctx.globalAlpha = d.alpha;
+    ctx.fillStyle = '#cbd5e1';
+    ctx.beginPath();
+    ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+    d.x += d.vx;
+    d.y += d.vy;
+    d.alpha -= 0.025;
+  });
+  anim.dust = anim.dust.filter(d => d.alpha > 0);
+
+  // ظل الملاكم
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.55)';
+  ctx.beginPath();
+  ctx.ellipse((leftFoot.x + rightFoot.x) * 0.5, floorBaseY + 8, 72, 13, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // === 2. الساقان والركبتان والحذاء ===
+  const hipLeftX = baseX + 20;
+  const hipRightX = baseX - 20;
+  const kneeLeftX = (hipLeftX + leftFoot.x) * 0.5 + 14 + (smoothPose.kneeBend * 0.25);
+  const kneeLeftY = (hipY + leftFoot.y) * 0.5 + (smoothPose.kneeBend * 0.35);
+  const kneeRightX = (hipRightX + rightFoot.x) * 0.5 - 8 - (smoothPose.kneeBend * 0.2);
+  const kneeRightY = (hipY + rightFoot.y) * 0.5 + (smoothPose.kneeBend * 0.35);
+
+  drawShadedLimb(hipRightX, hipY + 14, kneeRightX, kneeRightY, 16, 12, false, false);
+  drawShadedLimb(kneeRightX, kneeRightY, rightFoot.x, rightFoot.y - 12, 12, 9, true, false);
+  drawBoxingBoot(rightFoot.x, rightFoot.y, false, rightFoot.angle);
+
+  drawShadedLimb(hipLeftX, hipY + 14, kneeLeftX, kneeLeftY, 17, 13, false, true);
+  drawShadedLimb(kneeLeftX, kneeLeftY, leftFoot.x, leftFoot.y - 12, 13, 9, true, true);
+  drawBoxingBoot(leftFoot.x, leftFoot.y, true, leftFoot.angle);
+
+  // === 3. السروال الكحلي والحزام الأحمر (BOXING) ===
+  const trunksTopY = hipY - 14;
+  ctx.fillStyle = '#0f172a';
+  ctx.beginPath();
+  ctx.roundRect(baseX - 36, trunksTopY, 72, 50, 8);
+  ctx.fill();
+  ctx.fillStyle = '#dc2626';
+  ctx.fillRect(baseX - 36, trunksTopY, 72, 13);
+  ctx.fillStyle = '#f8fafc';
+  ctx.fillRect(baseX - 10, trunksTopY + 2, 26, 9);
+  ctx.fillStyle = '#0f172a';
+  ctx.font = 'bold 7px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('BOXING', baseX + 3, trunksTopY + 9);
+
+  // === 4. الجذع بقميص الملاكمة الكحلي ===
+  const leanOffsetX = Math.sin(smoothPose.torsoLean) * 66;
+  const shoulderY = trunksTopY - 66 + (smoothPose.kneeBend * 0.15);
+  const shLeft = { x: baseX + leanOffsetX + (32 + smoothPose.torsoRot * 26), y: shoulderY };
+  const shRight = { x: baseX + leanOffsetX - (36 - smoothPose.torsoRot * 26), y: shoulderY - 2 };
+
+  const singletGrad = ctx.createLinearGradient(shRight.x, shoulderY, shLeft.x, trunksTopY);
+  singletGrad.addColorStop(0, '#020617');
+  singletGrad.addColorStop(0.5, '#0f172a');
+  singletGrad.addColorStop(1, '#1e293b');
+
+  ctx.beginPath();
+  ctx.moveTo(shRight.x + 6, shRight.y);
+  ctx.quadraticCurveTo(baseX + leanOffsetX, shoulderY - 6, shLeft.x - 6, shLeft.y);
+  ctx.lineTo(baseX + 34, trunksTopY + 2);
+  ctx.lineTo(baseX - 34, trunksTopY + 2);
+  ctx.closePath();
+  ctx.fillStyle = singletGrad;
+  ctx.fill();
+  ctx.strokeStyle = '#334155';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  // === 5. الرأس واللحية الخفيفة ===
+  const headX = baseX + leanOffsetX + smoothPose.headX + (smoothPose.torsoRot * -6);
+  const headY = shoulderY - 34 + smoothPose.headY;
+
+  ctx.fillStyle = '#9e5e36';
+  ctx.fillRect(headX - 11, headY + 12, 22, 18);
+
+  const headGrad = ctx.createRadialGradient(headX + 6, headY - 4, 3, headX, headY, 24);
+  headGrad.addColorStop(0, '#f3c19d');
+  headGrad.addColorStop(0.65, '#c67f50');
+  headGrad.addColorStop(1, '#7a4422');
+
+  ctx.beginPath();
+  ctx.ellipse(headX, headY, 18, 22, (smoothPose.headX + leanOffsetX) * 0.006, 0, Math.PI * 2);
+  ctx.fillStyle = headGrad;
+  ctx.fill();
+
+  // الشعر واللحية
+  ctx.fillStyle = '#111318';
+  ctx.beginPath();
+  ctx.arc(headX, headY - 6, 18, Math.PI * 1.05, Math.PI * 1.95);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(headX + 2, headY + 6, 16, Math.PI * 0.15, Math.PI * 0.85);
+  ctx.strokeStyle = 'rgba(17, 19, 24, 0.7)';
+  ctx.lineWidth = 4;
+  ctx.stroke();
+
+  // العيون
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(headX + 1, headY - 2, 5, 3);
+  ctx.fillRect(headX + 9, headY - 2, 5, 3);
+  ctx.fillStyle = '#090d16';
+  ctx.fillRect(headX + 3.5, headY - 2, 2.5, 3);
+  ctx.fillRect(headX + 11.5, headY - 2, 2.5, 3);
+
+  // === 6. ميكانيكا الذراعين واللكمات ===
+  let tLHandX = 34, tLHandY = 6, tLHandR = 21, tLHandRot = -0.15;
+  let tLElX = shLeft.x - headX + 8, tLElY = shLeft.y - headY + 44;
+
+  let tRHandX = -4, tRHandY = 6, tRHandR = 20, tRHandRot = 0.15;
+  let tRElX = shRight.x - headX - 6, tRElY = shRight.y - headY + 44;
+
+  let zLeft = 0.1, zRight = 0.0;
+
+  if (act === 'jab' || act === 'double_jab') {
+    const ext = 82 * p;
+    tLHandX = 34 + ext;
+    tLHandY = 4 - (10 * p);
+    tLHandR = 21 + (4 * p);
+    tLHandRot = 0;
+    tLElX = ((shLeft.x - headX) + tLHandX) * 0.5;
+    tLElY = ((shLeft.y - headY) + tLHandY) * 0.5 + 3 * (1 - p);
+    zLeft = p;
+    guide = { type: 'straight', color: '#38bdf8', x1: headX + 34, y1: headY + 4, x2: headX + tLHandX - 16, y2: headY + tLHandY, alpha: p };
+  } else if (act === 'body_jab') {
+    tLHandX = 34 + (74 * p);
+    tLHandY = 48 * p;
+    tLElX = ((shLeft.x - headX) + tLHandX) * 0.5;
+    tLElY = ((shLeft.y - headY) + tLHandY) * 0.5;
+    zLeft = p;
+  } else if (act === 'cross') {
+    tRHandX = -4 + (124 * p);
+    tRHandY = 4 - (8 * p);
+    tRHandR = 20 + (6 * p);
+    tRHandRot = 0;
+    tRElX = ((shRight.x - headX) + tRHandX) * 0.5;
+    tRElY = ((shRight.y - headY) + tRHandY) * 0.5 + 3 * (1 - p);
+    zRight = p;
+
+    // سحب اليد اليسرى لحماية الذقن بقوة أثناء الكروس
+    tLHandX = 34 - (28 * p);
+    tLHandY = 6;
+    tLElX = (shLeft.x - headX) - (10 * p);
+    guide = { type: 'straight', color: '#ef4444', x1: headX + 10, y1: headY + 4, x2: headX + tRHandX - 16, y2: headY + tRHandY, alpha: p };
+  } else if (act === 'overhand') {
+    tRHandX = -4 + (116 * p);
+    tRHandY = -30 + (30 * p);
+    tRElX = 28;
+    tRElY = -40;
+    tLHandX = 8;
+    zRight = p;
+  } else if (act === 'left_hook') {
+    // هوك يسار: رفع المرفق بزاوية 90 درجة مع قوس أفقي عريض للقفاز الأزرق
+    tLElX = (shLeft.x - headX) + (44 * p);
+    tLElY = (shLeft.y - headY) - (4 * p);
+    tLHandX = tLElX + (24 * Math.cos(p * 1.15));
+    tLHandY = tLElY + (6 * Math.sin(p * Math.PI));
+    tLHandR = 21 + (7 * p);
+    tLHandRot = 1.15 * p;
+    zLeft = p;
+    guide = { type: 'hook', x1: headX + tLHandX + 28, y1: headY + tLHandY - 12, cx: headX + tLHandX + 34, cy: headY + tLHandY + 18, x2: headX + tLHandX - 6, y2: headY + tLHandY + 4, alpha: p };
+  } else if (act === 'right_hook') {
+    // هوك يمين: رفع المرفق الأيمن بزاوية 90 درجة وقوس أفقي للقفاز الأحمر
+    tRElX = (shRight.x - headX) + (62 * p);
+    tRElY = (shRight.y - headY) - (4 * p);
+    tRHandX = tRElX + (32 * Math.cos(p * 0.95));
+    tRHandY = tRElY + (6 * Math.sin(p * Math.PI));
+    tRHandR = 20 + (8 * p);
+    tRHandRot = 1.15 * p;
+    tLHandX = 10;
+    zRight = p;
+    guide = { type: 'hook', x1: headX + tRHandX + 26, y1: headY + tRHandY - 12, cx: headX + tRHandX + 32, cy: headY + tRHandY + 18, x2: headX + tRHandX - 6, y2: headY + tRHandY + 4, alpha: p };
+  } else if (act === 'body_hook') {
+    tLElX = (shLeft.x - headX) + (40 * p);
+    tLElY = 38 * p;
+    tLHandX = tLElX + (26 * Math.cos(p * 0.95));
+    tLHandY = tLElY + 4;
+    tLHandR = 21 + (6 * p);
+    tLHandRot = 1.05 * p;
+    zLeft = p;
+    guide = { type: 'hook', x1: headX + tLHandX + 24, y1: headY + tLHandY - 8, cx: headX + tLHandX + 28, cy: headY + tLHandY + 16, x2: headX + tLHandX - 6, y2: headY + tLHandY + 2, alpha: p };
+  } else if (act === 'uppercut') {
+    // أبركت يمين: هبوط للخصر ثم صعود عمودي حاد للذقن
+    const rise = p < 0.25 ? -(p / 0.25) * 26 : -26 + ((p - 0.25) / 0.75) * 72;
+    tRHandX = 16 + (48 * p);
+    tRHandY = 24 - rise;
+    tRHandR = 20 + (6 * p);
+    tRHandRot = -1.25 * p;
+    tRElX = tRHandX - 24;
+    tRElY = tRHandY + 40;
+    tLHandX = 10;
+    zRight = p;
+    if (p > 0.25) {
+      guide = { type: 'uppercut', x: headX + tRHandX + 12, y1: headY + 48, y2: headY + tRHandY - 8, alpha: p };
+    }
+  } else if (act === 'left_uppercut') {
+    const rise = p < 0.25 ? -(p / 0.25) * 24 : -24 + ((p - 0.25) / 0.75) * 68;
+    tLHandX = 34 + (26 * p);
+    tLHandY = 24 - rise;
+    tLHandR = 21 + (5 * p);
+    tLHandRot = -1.25 * p;
+    tLElX = tLHandX - 18;
+    tLElY = tLHandY + 40;
+    zLeft = p;
+    if (p > 0.25) {
+      guide = { type: 'uppercut', x: headX + tLHandX + 12, y1: headY + 46, y2: headY + tLHandY - 8, alpha: p };
+    }
+  } else if (act === 'block') {
+    tLHandX = 18;
+    tLHandY = -4;
+    tRHandX = 4;
+    tRHandY = -4;
+  } else if (act === 'parry') {
+    tLHandX = 34 + (20 * p);
+    tLHandY = 6;
+  } else if (act === 'feint') {
+    tLHandX = 34 + (18 * p);
+    tLHandY = 2;
+  }
+
+  // استيفاء سريع للذراعين والقفازين (0.48 لاستجابة خاطفة وسلسة)
+  const armSmooth = 0.48;
+  smoothPose.lHandX = lerp(smoothPose.lHandX, tLHandX, armSmooth);
+  smoothPose.lHandY = lerp(smoothPose.lHandY, tLHandY, armSmooth);
+  smoothPose.lHandR = lerp(smoothPose.lHandR, tLHandR, armSmooth);
+  smoothPose.lHandRot = lerp(smoothPose.lHandRot, tLHandRot, armSmooth);
+  smoothPose.lElX = lerp(smoothPose.lElX, tLElX, armSmooth);
+  smoothPose.lElY = lerp(smoothPose.lElY, tLElY, armSmooth);
+
+  smoothPose.rHandX = lerp(smoothPose.rHandX, tRHandX, armSmooth);
+  smoothPose.rHandY = lerp(smoothPose.rHandY, tRHandY, armSmooth);
+  smoothPose.rHandR = lerp(smoothPose.rHandR, tRHandR, armSmooth);
+  smoothPose.rHandRot = lerp(smoothPose.rHandRot, tRHandRot, armSmooth);
+  smoothPose.rElX = lerp(smoothPose.rElX, tRElX, armSmooth);
+  smoothPose.rElY = lerp(smoothPose.rElY, tRElY, armSmooth);
+
+  const leftHand = { x: headX + smoothPose.lHandX, y: headY + smoothPose.lHandY, r: smoothPose.lHandR, z: zLeft, rot: smoothPose.lHandRot };
+  const rightHand = { x: headX + smoothPose.rHandX, y: headY + smoothPose.rHandY, r: smoothPose.rHandR, z: zRight, rot: smoothPose.rHandRot };
+  const elLeft = { x: headX + smoothPose.lElX, y: headY + smoothPose.lElY };
+  const elRight = { x: headX + smoothPose.rElX, y: headY + smoothPose.rElY };
+
+  // تسجيل مسار القفازين لرسم أثر السرعة (Motion Trail)
+  if (activePunchPowerL > 0.25) {
+    anim.gloveTrailL.push({ x: leftHand.x, y: leftHand.y, r: leftHand.r });
+    if (anim.gloveTrailL.length > 5) anim.gloveTrailL.shift();
+  } else {
+    anim.gloveTrailL = [];
+  }
+
+  if (activePunchPowerR > 0.25) {
+    anim.gloveTrailR.push({ x: rightHand.x, y: rightHand.y, r: rightHand.r });
+    if (anim.gloveTrailR.length > 5) anim.gloveTrailR.shift();
+  } else {
+    anim.gloveTrailR = [];
+  }
+
+  function renderArm(sh, el, hand, isBlueLeft, trail) {
+    drawShadedLimb(sh.x, sh.y + 2, el.x, el.y, 13, 10, true, isBlueLeft);
+    drawShadedLimb(el.x, el.y, hand.x, hand.y, 10, hand.r * 0.45, true, isBlueLeft);
+    ctx.beginPath();
+    ctx.arc(sh.x, sh.y + 3, 14, 0, Math.PI * 2);
+    ctx.fillStyle = isBlueLeft ? '#c67f50' : '#9e5e36';
+    ctx.fill();
+    drawGloveTrail(trail, isBlueLeft);
+    drawBoxingGlove(hand.x, hand.y, hand.r, isBlueLeft, hand.z, hand.rot);
+  }
+
+  if (rightHand.z > leftHand.z) {
+    renderArm(shLeft, elLeft, leftHand, true, anim.gloveTrailL);
+    renderArm(shRight, elRight, rightHand, false, anim.gloveTrailR);
+  } else {
+    renderArm(shRight, elRight, rightHand, false, anim.gloveTrailR);
+    renderArm(shLeft, elLeft, leftHand, true, anim.gloveTrailL);
+  }
+
+  if (guide && guide.type !== 'pivot') {
+    drawMotionGuide(guide);
+  }
+
+  requestAnimationFrame(renderBoxerCanvas);
+}
+requestAnimationFrame(renderBoxerCanvas);
+
+// === 4. منطق الجولات والنطق المتزامن ===
+let selectedMode = 'session';
+let isRunning = false;
+let isRest = false;
+let roundNum = 1;
+let totalRoundSeconds = 180;
+let timeLeft = 180;
+let timerInterval = null;
+let comboTimeout = null;
+let speechSessionId = 0;
+let lastText = "";
+let wakeLock = null;
+let currentRepCombo = repetitionCombos[0];
+let repCount = 0;
+let customCombos = JSON.parse(localStorage.getItem('customBoxingCombosPRO') || '[]');
+
+function getEffectiveMode() {
+  if (selectedMode !== 'session') return selectedMode;
+  const cycle = ((roundNum - 1) % 3) + 1;
+  if (cycle === 1) return 'rep';
+  if (cycle === 2) return 'counter';
+  return 'freestyle';
+}
+
+function selectTrainingMode(mode) {
+  selectedMode = mode;
+  document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('active'));
+  document.getElementById('card_' + mode).classList.add('active');
+  updateModeUI();
+  if (isRunning && !isRest) {
+    clearTimeout(comboTimeout);
+    speechSessionId++;
+    window.speechSynthesis.cancel();
+    repCount = 0;
+    triggerNextAction();
+  }
+}
+
+function updateModeUI() {
+  const eff = getEffectiveMode();
+  const pill = document.getElementById('activeModePill');
+  const tempoWrap = document.getElementById('tempoBarWrap');
+  const repBadge = document.getElementById('repCounterBadge');
+  const nextBtn = document.getElementById('nextComboBtn');
+
+  if (eff === 'rep') {
+    pill.innerText = "وضع التكرار";
+    pill.style.background = "rgba(255, 183, 3, 0.2)";
+    pill.style.color = "#ffb703";
+    tempoWrap.style.display = "block";
+    repBadge.style.display = "block";
+    nextBtn.style.display = "block";
+  } else if (eff === 'counter') {
+    pill.innerText = "هجوم مضاد";
+    pill.style.background = "rgba(230, 57, 70, 0.2)";
+    pill.style.color = "#ff758f";
+    tempoWrap.style.display = "none";
+    repBadge.style.display = "none";
+    nextBtn.style.display = "none";
+  } else {
+    pill.innerText = "لعب حر موجه";
+    pill.style.background = "rgba(42, 157, 143, 0.2)";
+    pill.style.color = "#80ffdb";
+    tempoWrap.style.display = "none";
+    repBadge.style.display = "none";
+    nextBtn.style.display = "none";
+  }
+}
+
+function pickRandomRepCombo() {
+  const formattedCustom = customCombos.map(c => ({
+    text: c.text,
+    speak: formatCustomBoxingTerms(c.text),
+    sub: "تركيبة مخصصة أضفتها أنت"
+  }));
+  const pool = [...repetitionCombos, ...formattedCustom];
+  let chosen = pool[Math.floor(Math.random() * pool.length)];
+  if (pool.length > 1 && chosen.text === currentRepCombo.text) {
+    chosen = pool[(pool.indexOf(chosen) + 1) % pool.length];
+  }
+  currentRepCombo = chosen;
+  repCount = 0;
+}
+
+function switchRepCombo() {
+  pickRandomRepCombo();
+  if (isRunning && !isRest && getEffectiveMode() === 'rep') {
+    clearTimeout(comboTimeout);
+    speechSessionId++;
+    window.speechSynthesis.cancel();
+    triggerNextAction();
+  } else {
+    renderComboChips(currentRepCombo.text, -1);
+    document.getElementById('comboSub').innerText = currentRepCombo.sub;
+  }
+}
+
+function renderComboChips(displayText, activeIdx) {
+  const parts = displayText.split(/[،,]+/).map(s => s.trim()).filter(Boolean);
+  const container = document.getElementById('comboDisplay');
+  container.innerHTML = parts.map((p, i) => {
+    let cls = 'step-chip';
+    if (i === activeIdx) cls += ' active-step';
+    else if (i < activeIdx) cls += ' done-step';
+    return `<span class="${cls}">${p}</span>`;
+  }).join('');
+}
+
+async function requestWakeLock() {
+  try {
+    if ('wakeLock' in navigator && isRunning) {
+      wakeLock = await navigator.wakeLock.request('screen');
+    }
+  } catch (err) {}
+}
+
+function releaseWakeLock() {
+  if (wakeLock !== null) {
+    wakeLock.release().then(() => { wakeLock = null; }).catch(() => {});
+  }
+}
+
+function playBell() {
+  try {
+    const ctxAudio = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctxAudio.createOscillator();
+    const gain = ctxAudio.createGain();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(820, ctxAudio.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(310, ctxAudio.currentTime + 1.2);
+    gain.gain.setValueAtTime(0.8, ctxAudio.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctxAudio.currentTime + 1.4);
+    osc.connect(gain);
+    gain.connect(ctxAudio.destination);
+    osc.start();
+    osc.stop(ctxAudio.currentTime + 1.4);
+  } catch (e) {}
+}
+
+function playClapper() {
+  try {
+    const ctxAudio = new (window.AudioContext || window.webkitAudioContext)();
+    [0, 0.16, 0.32].forEach(offset => {
+      const osc = ctxAudio.createOscillator();
+      const gain = ctxAudio.createGain();
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(1150, ctxAudio.currentTime + offset);
+      osc.frequency.exponentialRampToValueAtTime(400, ctxAudio.currentTime + offset + 0.06);
+      gain.gain.setValueAtTime(0.6, ctxAudio.currentTime + offset);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctxAudio.currentTime + offset + 0.07);
+      osc.connect(gain);
+      gain.connect(ctxAudio.destination);
+      osc.start(ctxAudio.currentTime + offset);
+      osc.stop(ctxAudio.currentTime + offset + 0.07);
+    });
+  } catch (e) {}
+}
+
+function speakAndAnimateCombo(displayText, speakText, customRate, customGapMs, onComplete) {
+  window.speechSynthesis.cancel();
+  speechSessionId++;
+  const currentSession = speechSessionId;
+
+  const displayParts = displayText.split(/[،,]+/).map(s => s.trim()).filter(Boolean);
+  const speakParts = speakText.split(/[،,]+/).map(s => s.trim()).filter(Boolean);
+  let index = 0;
+
+  anim.speed = 0.042 * customRate;
+
+  function stepNext() {
+    if (currentSession !== speechSessionId || !isRunning || isRest) return;
+    if (index >= speakParts.length) {
+      triggerCharacterAction('idle', 'وقفة Orthodox (اليسرى أماماً)', customRate);
+      if (onComplete) onComplete();
+      return;
+    }
+
+    const currentSpeak = speakParts[index];
+    const currentLabel = displayParts[Math.min(index, displayParts.length - 1)] || currentSpeak;
+    const moveCode = parseMoveFromArabic(currentSpeak);
+
+    triggerCharacterAction(moveCode, currentLabel, customRate);
+    renderComboChips(displayText, Math.min(index, displayParts.length - 1));
+
+    const utter = new SpeechSynthesisUtterance(currentSpeak);
+    utter.lang = 'ar-SA';
+    utter.rate = customRate;
+    utter.pitch = 1.0;
+
+    let finished = false;
+    const proceed = () => {
+      if (finished) return;
+      finished = true;
+      index++;
+      if (index < speakParts.length) {
+        comboTimeout = setTimeout(stepNext, customGapMs);
+      } else {
+        triggerCharacterAction('idle', 'وقفة Orthodox (اليسرى أماماً)', customRate);
+        if (onComplete) onComplete();
+      }
+    };
+
+    utter.onend = proceed;
+    utter.onerror = proceed;
+
+    window.speechSynthesis.speak(utter);
+    const fallbackMs = Math.max(920, (currentSpeak.length * 108) / customRate);
+    comboTimeout = setTimeout(proceed, fallbackMs);
+  }
+
+  stepNext();
+}
+
+function speakSystemAlert(text) {
+  window.speechSynthesis.cancel();
+  speechSessionId++;
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = 'ar-SA';
+  utter.rate = 0.95;
+  window.speechSynthesis.speak(utter);
+}
+
+function triggerNextAction() {
+  if (!isRunning || isRest) return;
+
+  const effMode = getEffectiveMode();
+  updateModeUI();
+
+  const baseRate = parseFloat(document.getElementById('rateRange').value);
+  const baseGapMs = parseFloat(document.getElementById('wordGapRange').value) * 1000;
+  const baseInterval = parseFloat(document.getElementById('intervalRange').value);
+
+  if (effMode === 'rep') {
+    repCount++;
+    document.getElementById('repCounterBadge').innerText = `التكرار #${repCount}`;
+
+    const elapsedRatio = Math.min(1, Math.max(0, (totalRoundSeconds - timeLeft) / totalRoundSeconds));
+    const speedMultiplier = 1.0 + (elapsedRatio * 0.35);
+    const effectiveRate = Math.min(1.35, baseRate * speedMultiplier);
+    const effectiveGapMs = Math.max(60, baseGapMs * (1 - elapsedRatio * 0.72));
+    const effectiveDelaySec = Math.max(1.0, baseInterval * (1 - elapsedRatio * 0.45));
+
+    const pct = Math.round(20 + elapsedRatio * 80);
+    document.getElementById('tempoFill').style.width = pct + "%";
+    document.getElementById('tempoSpeedLabel').innerText = `السرعة: ${effectiveRate.toFixed(2)}x`;
+    if (elapsedRatio < 0.35) {
+      document.getElementById('tempoStageLabel').innerText = "المرحلة 1: إتقان التكنيك";
+    } else if (elapsedRatio < 0.75) {
+      document.getElementById('tempoStageLabel').innerText = "المرحلة 2: رفع الوتيرة";
+    } else {
+      document.getElementById('tempoStageLabel').innerText = "المرحلة 3: أقصى سرعة انفجارية!";
+    }
+
+    document.getElementById('comboSub').innerText = currentRepCombo.sub;
+
+    speakAndAnimateCombo(currentRepCombo.text, currentRepCombo.speak, effectiveRate, effectiveGapMs, () => {
+      if (!isRunning || isRest) return;
+      comboTimeout = setTimeout(triggerNextAction, effectiveDelaySec * 1000);
+    });
+
+  } else if (effMode === 'counter') {
+    const formattedCustom = customCombos.map(c => ({
+      text: c.text,
+      speak: formatCustomBoxingTerms(c.text),
+      sub: "تركيبة مضادة مخصصة"
+    }));
+    const pool = [...counterCombos, ...formattedCustom];
+    let chosen = pool[Math.floor(Math.random() * pool.length)];
+    if (pool.length > 1 && chosen.text === lastText) {
+      chosen = pool[(pool.indexOf(chosen) + 1) % pool.length];
+    }
+    lastText = chosen.text;
+    document.getElementById('comboSub').innerText = chosen.sub;
+
+    speakAndAnimateCombo(chosen.text, chosen.speak, baseRate, baseGapMs, () => {
+      if (!isRunning || isRest) return;
+      const jitter = (Math.random() * 1.0) - 0.4;
+      const delay = Math.max(1.2, baseInterval + jitter);
+      comboTimeout = setTimeout(triggerNextAction, delay * 1000);
+    });
+
+  } else {
+    let chosen = freestyleCues[Math.floor(Math.random() * freestyleCues.length)];
+    if (freestyleCues.length > 1 && chosen.text === lastText) {
+      chosen = freestyleCues[(freestyleCues.indexOf(chosen) + 1) % freestyleCues.length];
+    }
+    lastText = chosen.text;
+    document.getElementById('comboSub').innerText = chosen.sub;
+
+    speakAndAnimateCombo(chosen.text, chosen.speak, baseRate, baseGapMs, () => {
+      if (!isRunning || isRest) return;
+      const freeDelay = Math.max(2.4, baseInterval + 1.0 + (Math.random() * 1.4));
+      comboTimeout = setTimeout(triggerNextAction, freeDelay * 1000);
+    });
+  }
+}
+
+function updateTimerDisplay() {
+  const timerEl = document.getElementById('timer');
+  const mins = String(Math.floor(timeLeft / 60)).padStart(2, '0');
+  const secs = String(timeLeft % 60).padStart(2, '0');
+  timerEl.innerText = `${mins}:${secs}`;
+  timerEl.classList.toggle('timer-warning', !isRest && timeLeft <= 10 && timeLeft > 0);
+}
+
+function tick() {
+  timeLeft--;
+
+  if (!isRest && timeLeft === 10) {
+    playClapper();
+  }
+
+  if (timeLeft <= 0) {
+    playBell();
+    const roundSec = parseInt(document.getElementById('roundTimeSelect').value);
+    if (!isRest) {
+      isRest = true;
+      clearTimeout(comboTimeout);
+      triggerCharacterAction('idle', 'فترة راحة', 1.0);
+      timeLeft = roundSec === 180 ? 60 : 30;
+      document.getElementById('roundBadge').className = "round-status status-rest";
+      document.getElementById('roundBadge').innerText = `استراحة - استعد للجولة ${roundNum + 1}`;
+      document.getElementById('comboDisplay').innerHTML = `<span class="step-chip">انتهت الجولة، فترة راحة</span>`;
+      document.getElementById('comboSub').innerText = "تنفس بعمق واستعد للجولة القادمة";
+      speakSystemAlert("انْتَهَتْ الجَوْلَة، فَتْرَة راحَة");
+    } else {
+      isRest = false;
+      roundNum++;
+      totalRoundSeconds = roundSec;
+      timeLeft = roundSec;
+      pickRandomRepCombo();
+      updateModeUI();
+      document.getElementById('roundBadge').className = "round-status status-fight";
+      document.getElementById('roundBadge').innerText = `الجولة ${roundNum} - قتال`;
+      speakSystemAlert(`الجَوْلَة ${roundNum}، ابْدَأْ!`);
+      comboTimeout = setTimeout(triggerNextAction, 1500);
+    }
+  }
+  updateTimerDisplay();
+}
+
+function toggleTraining() {
+  const btn = document.getElementById('startBtn');
+  if (!isRunning) {
+    isRunning = true;
+    btn.innerText = "إيقاف مؤقت";
+    btn.classList.add('running');
+    requestWakeLock();
+    playBell();
+
+    Object.values(loadedVideos).forEach(m => {
+      m.element.play().then(() => {
+        if (m.element !== (loadedVideos.guard && loadedVideos.guard.element)) {
+          m.element.pause();
+          m.element.currentTime = 0;
+        }
+      }).catch(() => {});
+    });
+
+    if (repCount === 0) pickRandomRepCombo();
+    updateModeUI();
+    timerInterval = setInterval(tick, 1000);
+    comboTimeout = setTimeout(triggerNextAction, 900);
+  } else {
+    isRunning = false;
+    btn.innerText = "استئناف الحصة";
+    btn.classList.remove('running');
+    releaseWakeLock();
+    clearInterval(timerInterval);
+    clearTimeout(comboTimeout);
+    speechSessionId++;
+    window.speechSynthesis.cancel();
+    triggerCharacterAction('idle', 'متوقف مؤقتاً', 1.0);
+  }
+}
+
+function resetTimer() {
+  const roundSec = parseInt(document.getElementById('roundTimeSelect').value);
+  isRest = false;
+  roundNum = 1;
+  totalRoundSeconds = roundSec;
+  timeLeft = roundSec;
+  document.getElementById('roundBadge').className = "round-status status-fight";
+  document.getElementById('roundBadge').innerText = "الجولة 1 - قتال";
+  updateModeUI();
+  updateTimerDisplay();
+}
+
+function updateSettings() {
+  document.getElementById('intervalVal').innerText = parseFloat(document.getElementById('intervalRange').value).toFixed(1) + " ثانية";
+  document.getElementById('wordGapVal').innerText = parseFloat(document.getElementById('wordGapRange').value).toFixed(2) + " ثانية";
+  document.getElementById('rateVal').innerText = parseFloat(document.getElementById('rateRange').value).toFixed(2) + "x";
+}
+
+function renderCustomCombos() {
+  const container = document.getElementById('customListContainer');
+  container.innerHTML = "";
+  customCombos.forEach((item, index) => {
+    const div = document.createElement('div');
+    div.className = 'custom-item';
+    div.innerHTML = `<span>${item.text}</span><button class="del-btn" onclick="deleteCustomCombo(${index})">حذف</button>`;
+    container.appendChild(div);
+  });
+}
+
+function addCustomCombo() {
+  const input = document.getElementById('customInput');
+  const val = input.value.trim();
+  if (!val) return;
+  customCombos.unshift({ text: val });
+  localStorage.setItem('customBoxingCombosPRO', JSON.stringify(customCombos));
+  input.value = "";
+  renderCustomCombos();
+}
+
+function deleteCustomCombo(index) {
+  customCombos.splice(index, 1);
+  localStorage.setItem('customBoxingCombosPRO', JSON.stringify(customCombos));
+  renderCustomCombos();
+}
+
+updateModeUI();
+renderCustomCombos();
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  });
+}
+</script>
+</body>
+</html>
