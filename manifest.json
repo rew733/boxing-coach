@@ -1,26 +1,20 @@
 {
-  "name": "مدرب الملاكمة التفاعلي - Pad Work Pro",
-  "short_name": "مدرب الملاكمة",
-  "description": "محاكي تدريب الملاكمة التفاعلي بالصوت والحركة وأوضاع Pad Work بدون إنترنت",
+  "name": "مدرب الملاكمة التفاعلي",
+  "short_name": "Boxing Coach",
   "start_url": "./index.html",
   "display": "standalone",
-  "orientation": "portrait",
   "background_color": "#080a0f",
   "theme_color": "#080a0f",
-  "dir": "rtl",
-  "lang": "ar",
   "icons": [
     {
       "src": "icon-192.png",
       "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     },
     {
       "src": "icon-512.png",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     }
   ]
 }
