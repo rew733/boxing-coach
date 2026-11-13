@@ -1,3 +1,7 @@
+
+
+
+----
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -597,13 +601,19 @@ function mapActionToVideoSlot(act) {
 }
 
 function switchVideoSlot(desiredKey, playbackRate = 1.0) {
-  const key = loadedVideos[desiredKey] ? desiredKey : (loadedVideos.guard ? 'guard' : null);
-  if (!key) return;
-  activeVideoKey = key;
-  const vid = loadedVideos[key].element;
-  vid.playbackRate = Math.min(2.0, Math.max(0.65, playbackRate));
-  if (key !== 'guard') vid.currentTime = 0;
-  vid.play().catch(() => {});
+  if (loadedVideos[desiredKey]) {
+    activeVideoKey = desiredKey;
+    const vid = loadedVideos[desiredKey].element;
+    vid.playbackRate = Math.min(2.0, Math.max(0.65, playbackRate));
+    if (desiredKey !== 'guard') vid.currentTime = 0;
+    vid.play().catch(() => {});
+  } else {
+    activeVideoKey = null;
+    if (desiredKey === 'guard' && loadedVideos['guard']) {
+      activeVideoKey = 'guard';
+      loadedVideos['guard'].element.play().catch(() => {});
+    }
+  }
 }
 
 initMediaDB();
@@ -1161,8 +1171,8 @@ function renderBoxerCanvas() {
   const w = rect.width;
   const h = rect.height;
 
-  // إذا رفع المستخدم فيديو MP4 مخصص، نعرضه
-  if (Object.keys(loadedVideos).length > 0 && loadedVideos[activeVideoKey]) {
+  // إذا رفع المستخدم فيديو MP4 مخصص لهذه الحركة بالذات، نعرضه
+  if (activeVideoKey && loadedVideos[activeVideoKey]) {
     const vid = loadedVideos[activeVideoKey].element;
     if (vid.videoWidth && vid.videoHeight) {
       ctx.fillStyle = '#07090e';
